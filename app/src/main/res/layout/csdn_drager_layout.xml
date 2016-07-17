@@ -1,0 +1,62 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/holo_orange_dark" >
+
+    <TextView
+        android:id="@+id/tv_behind"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="Text Behind"
+        android:textSize="48sp" />
+
+    <floatcustomlayout.CSDNDragLayout
+        android:id="@+id/dragLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/background_dark" >
+
+        <FrameLayout
+            android:id="@+id/headView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="@android:color/holo_blue_bright" >
+
+            <TextView
+                android:id="@+id/tv_head"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="head"
+                android:textSize="48sp" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/handleView"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="@android:color/holo_blue_dark"
+            android:gravity="center"
+            android:text="handle" />
+
+        <FrameLayout
+            android:id="@+id/footView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/holo_blue_bright"
+            android:focusable="false"
+            android:focusableInTouchMode="false" >
+
+            <TextView
+                android:id="@+id/tv_foot"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="content"
+                android:textSize="48sp" />
+        </FrameLayout>
+    </floatcustomlayout.CSDNDragLayout>
+
+</FrameLayout>

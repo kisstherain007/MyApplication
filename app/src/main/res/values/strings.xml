@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="float_top_layout_text">Header Content</string>
+    <string name="float_layout_test_1">ScrollView_item</string>
+    <string name="float_layout_test_listview">ListView</string>
+    <string name="float_layout_test_scrollview">ScrollView</string>
+</resources>
