@@ -100,7 +100,7 @@ public class PagerNavigationView extends LinearLayout implements PagerNavCallbac
             ImageView imageView = new ImageView(mContext);
             int dip = 7;//设备像素
 
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(DensityUtil.dip2px
+            LayoutParams params = new LayoutParams(DensityUtil.dip2px
                     (mContext, dip),
                     DensityUtil.dip2px(mContext, dip));
             if (i != 0) {

@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         mDisplaySpecLayout.setGoodsSizeDataOnDisplaySpecLayout(datas);
 
 //        startActivity(new Intent(this, FloatMainActivity.class));
-        startActivity(new Intent(this, Main2Activity.class));
+//        startActivity(new Intent(this, Main2Activity.class));
+        startActivity(new Intent(this, Main4Activity.class));
     }
 }

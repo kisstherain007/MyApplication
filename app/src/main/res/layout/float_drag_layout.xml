@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+   <floatcustomlayout.FloatDragLayout
+       android:id="@+id/float_drag_layout"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:orientation="vertical">
+
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:orientation="vertical">
+
+       <LinearLayout
+           android:id="@+id/header_layout"
+           android:layout_width="match_parent"
+           android:layout_height="300dp"
+           android:orientation="vertical"
+           android:background="@android:color/holo_orange_light">
+           <TextView
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:text="header"
+               />
+
+       </LinearLayout>
+
+       <LinearLayout
+           android:id="@+id/middle_layout"
+           android:layout_width="match_parent"
+           android:layout_height="155dp"
+           android:orientation="vertical"
+           android:background="@android:color/holo_green_light">
+
+           <TextView
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:text="middle"/>
+
+       </LinearLayout>
+
+       <LinearLayout
+           android:id="@+id/bottom_layout"
+           android:layout_width="match_parent"
+           android:layout_height="2000dp"
+           android:orientation="vertical"
+           android:background="@android:color/darker_gray">
+
+           <TextView
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:text="bottom"/>
+
+       </LinearLayout>
+
+       </LinearLayout>
+
+   </floatcustomlayout.FloatDragLayout>
+
+</LinearLayout>

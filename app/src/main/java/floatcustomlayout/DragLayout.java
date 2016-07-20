@@ -7,13 +7,16 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
@@ -24,15 +27,22 @@ import com.example.n930044.myapplication.R;
  */
 public class DragLayout extends LinearLayout {
 
+    public static final String TAG = DragLayout.class.getSimpleName();
+
     private ViewDragHelper mDragHelper = null;
     private ViewDragHelper.Callback callback = null;
+    LinearLayout rootLayout;
     LinearLayout containerView;
     LinearLayout headerView;
     LinearLayout floatView;
     ViewPager mContent;
 
     Context mContext;
+    private Point targerPointPosition = new Point();
     private Point initPointPosition = new Point();
+    private Point nextPointPosition = new Point();
+    WindowManager wm = (WindowManager) getContext()
+            .getSystemService(Context.WINDOW_SERVICE);
 
     public DragLayout(Context context) {
         super(context);
@@ -52,6 +62,7 @@ public class DragLayout extends LinearLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
+        rootLayout = (LinearLayout) findViewById(R.id.root_layout);
         containerView = (LinearLayout) findViewById(R.id.main_container);
         headerView = (LinearLayout) findViewById(R.id.header_layout);
         floatView = (LinearLayout) findViewById(R.id.float_layout);
@@ -62,18 +73,47 @@ public class DragLayout extends LinearLayout {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        Log.d(TAG, "onSizeChanged");
         mHeaderHeight = headerView.getMeasuredHeight();
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        ViewGroup.LayoutParams layoutParams = mContent.getLayoutParams();
-        layoutParams.height = getMeasuredHeight() - floatView.getMeasuredHeight();
+        Log.d(TAG, "onMeasure");
+
+        // reset container height
+        DisplayMetrics dm = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(dm);
+        int height = dm.heightPixels / 2;  //得到高度
+
+        // header
+        ViewGroup.LayoutParams layoutParamsHeader = headerView.getLayoutParams();
+        layoutParamsHeader.height = height;
+
+        // container
+        ViewGroup.LayoutParams layoutParamsContainer = containerView.getLayoutParams();
+        layoutParamsContainer.height = getMeasuredHeight() + floatView.getMeasuredHeight();
+
+        // reset content height
+        ViewGroup.LayoutParams layoutParamsCotnent = mContent.getLayoutParams();
+        layoutParamsCotnent.height = getMeasuredHeight() - floatView.getMeasuredHeight();
+
+        // root
+        ViewGroup.LayoutParams layoutParamsRoot = rootLayout.getLayoutParams();
+        layoutParamsRoot.height = getMeasuredHeight() + floatView.getMeasuredHeight();
+        layoutParamsRoot.height = layoutParamsCotnent.height + floatView.getMeasuredHeight() + layoutParamsHeader.height;
     }
 
     boolean isHidenHeader = false; // 默认header显示
     boolean isCanScrollcontainerView = true;
+
+    @Override
+    public void computeScroll() {
+        if (mDragHelper.continueSettling(true)) {
+            ViewCompat.postInvalidateOnAnimation(this);
+        }
+    }
 
     class DraggerCallBack extends ViewDragHelper.Callback{
 
@@ -104,11 +144,24 @@ public class DragLayout extends LinearLayout {
 
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
+
             //松手的时候 判断如果是这个view 就让他回到起始位置
             if (releasedChild == containerView) {
-                //这边代码你跟进去去看会发现最终调用的是startScroll这个方法 所以我们就明白还要在computeScroll方法里刷新
-                mDragHelper.settleCapturedViewAt(initPointPosition.x, initPointPosition.y);
-                invalidate();
+
+            Log.d("xxxx", "xvel" + xvel);
+            Log.d("xxxx", "yvel" + yvel);
+            Log.d("xxxx", "releasedChild.getY()" + releasedChild.getY());
+            Log.d("xxxx", "headerView.getHeight()" + headerView.getHeight());
+
+            if ((releasedChild.getY() < -(headerView.getHeight()/3)) && (targerPointPosition == initPointPosition)){ // 下滑
+                Log.d("xxxx", "下滑");
+                targerPointPosition = nextPointPosition;
+            }else if((releasedChild.getY() > (500 - (headerView.getHeight()))) && (targerPointPosition == nextPointPosition)){
+                targerPointPosition = initPointPosition;
+                Log.d("xxxx", "上滑");
+            }
+                mDragHelper.settleCapturedViewAt(targerPointPosition.x, targerPointPosition.y);
+                ViewCompat.postInvalidateOnAnimation(DragLayout.this);
             }
         }
 
@@ -139,6 +192,13 @@ public class DragLayout extends LinearLayout {
         //布局完成的时候就记录一下位置
         initPointPosition.x = containerView.getLeft();
         initPointPosition.y = containerView.getTop();
+
+        nextPointPosition.x = floatView.getLeft();
+        nextPointPosition.y = -floatView.getTop();
+
+        targerPointPosition = initPointPosition;
+
+        Log.d("ktr", nextPointPosition.toString());
     }
 
     float mInitialMotionY;
@@ -159,9 +219,6 @@ public class DragLayout extends LinearLayout {
         switch (action){
 
             case MotionEvent.ACTION_DOWN:
-                View view = mDragHelper.findTopChildUnder((int) x, (int) y);
-                Log.d("DragLayout", "view:" + view);
-                Log.d("DragLayout", "ACTION_DOWN");
                 mInitialMotionY = y;
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -170,13 +227,14 @@ public class DragLayout extends LinearLayout {
                 moveY = y - mInitialMotionY;
                 // 拦截 下滑/header没有显示/listView 第一行在顶端
                 if (mInnerScrollview instanceof ListView) {
-//                    ListView listView = (ListView) mInnerScrollview;
-//                    View viewItem = listView.getChildAt(listView.getFirstVisiblePosition());
-//                    Log.d("DragLayout", " moveY:"+ moveY + " isHidenHeader:" + isHidenHeader + " viewItem.getTop():" + (viewItem == null ? "null" : viewItem.getTop()));
-//                    if (moveY > 0 && isHidenHeader && ((viewItem != null && viewItem.getTop() == 0))){
-//                        return (temp = true); //拦截
-//                    }
-//
+                    ListView listView = (ListView) mInnerScrollview;
+                    View viewItem = listView.getChildAt(listView.getFirstVisiblePosition());
+                    Log.d("DragLayout", " moveY:"+ moveY + " isHidenHeader:" + isHidenHeader + " viewItem.getTop():" + (viewItem == null ? "null" : viewItem.getTop()));
+
+                    if (moveY > 0 && isHidenHeader && ((viewItem != null && viewItem.getTop() == 0))){
+                        isHidenHeader = false; //拦截
+                    }
+
 //                    if (moveY <0 && !isHidenHeader && ((viewItem != null && viewItem.getTop() == 0))){
 //                        return (temp = true); //拦截
 //                    }
@@ -184,12 +242,11 @@ public class DragLayout extends LinearLayout {
                 break;
         }
 
-
-        if (isHidenHeader ){
+        // movey > 0 下划
+        if (isHidenHeader){
 
             return false; // 不拦截 ListView 滑动
         }else {
-
             return true; //拦截
         }
     }
@@ -208,16 +265,29 @@ public class DragLayout extends LinearLayout {
             case MotionEvent.ACTION_MOVE:
                 Log.d("DragLayout", "onTouchEvent: ACTION_MOVE");
                 float moveY = y - mInitialMotionY;
-                if (isHidenHeader){
+                // 拦截 下滑/header没有显示/listView 第一行在顶端
+                if (mInnerScrollview instanceof ListView) {
+                    ListView listView = (ListView) mInnerScrollview;
+                    View viewItem = listView.getChildAt(listView.getFirstVisiblePosition());
+                    Log.d("DragLayout", " moveY:"+ moveY + " isHidenHeader:" + isHidenHeader + " viewItem.getTop():" + (viewItem == null ? "null" : viewItem.getTop()));
 
+                    if (moveY > 0 && isHidenHeader && ((viewItem != null && viewItem.getTop() == 0))){
+
+                        isHidenHeader = false; //拦截
+                    }
                 }
+
                 break;
         }
 
         try {
+            if(!isHidenHeader){
 
-            mDragHelper.processTouchEvent(event);
-
+                mDragHelper.processTouchEvent(event);
+            }else {
+//
+                return false;
+            }
         } catch (Exception e) {
         }
 

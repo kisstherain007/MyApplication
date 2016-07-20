@@ -6,7 +6,7 @@
     <RelativeLayout
         android:id="@+id/float_layout_top"
         android:layout_width="match_parent"
-        android:layout_height="500dp"
+        android:layout_height="2000dp"
         android:background="@android:color/white">
 
         <LinearLayout
